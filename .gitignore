@@ -1,0 +1,13 @@
+node_modules/
+
+uploads/
+
+package-lock.json
+
+db/
+
+.env
+
+excel/
+
+extra.js

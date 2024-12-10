@@ -15,35 +15,28 @@ const stripe = require("stripe")(
 export const create = async (body, authInfo) => {
   try {
     body.created_by = authInfo._id;
-    console.log(body)
-    stripe.products
-      .create({
-        name: body.title ?? "Starter Subscription",
-        description: body.description ?? "$12/Month subscription",
-      })
-      .then((product) => {
-        stripe.prices
-          .create({
-            unit_amount: parseInt(body.description) ?? 1200,
-            currency: "usd",
-            product: product.id,
-          })
-          .then(async (price) => {
-            body.product_id = product.id;
-            body.price_id = price.id;
-            const data = await Task(body);
-            const result = await data.save();
-            console.log("successfully added" , result)
-            return result;
-          })
-          .catch((err) => {
-            console.log(err)
-            throw err;
-          });
+    console.log(body);
 
-      });
-  } catch (error) { 
-    console.log(err)
+    const product = await stripe.products.create({
+      name: body.title ?? "Starter Subscription",
+      description: body.description ?? "$12/Month subscription",
+    });
+
+    const price = await stripe.prices.create({
+      unit_amount: parseInt(body.description) ?? 1200,
+      currency: "usd",
+      product: product.id,
+    });
+
+    body.product_id = product.id;
+    body.price_id = price.id;
+    const data = await Task(body);
+    const result = await data.save();
+    console.log("successfully added", result);
+
+    return result;
+  } catch (error) {
+    console.log(err);
     throw error;
   }
 };
@@ -133,9 +126,8 @@ export const getWithPagination = async (
 };
 
 export const deleteByIds = async (ids) => {
-    try {
-    let result = await Task
-    .deleteMany({
+  try {
+    let result = await Task.deleteMany({
       _id: { $in: ids.map((item) => mongoose.Types.ObjectId(item)) },
     });
     return result;
@@ -144,13 +136,12 @@ export const deleteByIds = async (ids) => {
   }
 };
 
-
 export const addToCart = async (id, authInfo) => {
   try {
     const product = await Task.findById(id);
     let user = await User.findById(authInfo._id);
     user.cart.push([product._id]);
-    user =  await user.save();
+    user = await user.save();
     return user.cart;
   } catch (err) {
     throw err;

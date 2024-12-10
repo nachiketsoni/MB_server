@@ -77,6 +77,7 @@ export const getById = async (req, res) => {
 export const create = async (req, res) => {
   try {
     const data = await taskService.create(req.body,req.user);
+    console.log("create product" , data);
     return successResponse(req, res, data);
   } catch (error) {
     console.log(error);
